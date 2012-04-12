@@ -1,0 +1,7 @@
+This is a silent version of pdflatex Makefile.
+
+Run `make help` for details.
+
+You may edit the first lines of the Makefile to set the main file name
+and the bibliografy filename, if there is one.
+
