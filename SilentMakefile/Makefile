@@ -26,16 +26,36 @@ V=0
 
 ERRO=\033[1m[\033[31;1mErro\033[0;1m]\033[0m
 AVISO=\033[1m[\033[33;1mAviso\033[0;1m]\033[0m
+INFO=\033[1m[\033[34;1mDebug\033[0;1m]\033[0m
 
 try_all:
-	@if [ -e $(BIB) ]; then make all; else \
-	echo "$(AVISO) Arquivo $(BIB) "\
-		"não encontrado: executando apenas alvo pdf";\
-	make pdf; fi
+	@if [ -e $(BIB) ]; then \
+		make all; \
+	else \
+		echo "$(AVISO) Arquivo $(BIB)"\
+			 "não encontrado: executando apenas alvo pdf";\
+		make pdf;\
+	fi
 
 debug:
+	@echo "$(INFO) 0% - Gerando PDF"
+	@sleep 1
 	@make LATEX=pdflatex V=1 _main
-	@make LATEX=pdflatex V=1 bib
+	@echo "$(INFO) 25% - Gerando bibliografia"
+	@if [ -e $(BIB) ]; then \
+		@sleep 1;\
+		@make LATEX=pdflatex V=1 bib;\
+	else \
+		echo "$(AVISO) Arquivo $(BIB)"\
+			 "não encontrado. Ignorando...";\
+		sleep 2;\
+	fi	
+	@echo "$(INFO) 50% - Gerando PDF"
+	@sleep 1
+	@make LATEX=pdflatex V=1 _main
+	@echo "$(INFO) 75% - Gerando PDF e limpando"
+	@sleep 1
+	@make LATEX=pdflatex V=1 pdf
 
 all: bib pdf
 	@echo "\033[32;1mOK\033[0m"
@@ -49,7 +69,9 @@ ifeq ($(V),0)
 	@if [ ! -f $(MAIN).tex ]; then \
 		echo "$(ERRO) Arquivo $(MAIN).tex não existe.";\
 		echo "Edite o início do Makefile para definir o nome do"\
-			 "arquivo TeX principal."; false; fi;
+			 "arquivo TeX principal.";\
+		false;\
+	fi;
 	@echo "PDF"
 	@$(LATEX) $(MAIN) > /dev/null || (echo "$(ERRO) Falhou ao gerar PDF:"\
 						"re-executando...\033[0m" && make debug && false)
