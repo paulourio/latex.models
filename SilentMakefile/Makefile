@@ -1,14 +1,35 @@
+# Makefile padrão para projetos LaTeX
+# Autor: Paulo Roberto Urio (paulourio gmail com)
+# Licença: FreeBSD
+
+# Nome do arquivo principal do seu projeto
 MAIN=main
+# Nome do arquivo de referências.  Pode ser utilizado caminho relativo
+# como BIB=../../bibliografia.bib
 BIB=referencias.bib
+# Comportamento padrão para o comando make sem argumentos.
+# Possibilidades: 
+#	try_all		Tenta gerar com bibliografia.  Se o arquivo não
+#							existir o alvo será redirecionado para 'pdf'
+#	pdf			Executa apenas o alvo PDF por padrão.
+# Veja 'make help' para mais opções de alvos.
+default: try_all
+
+#-------------------------------------------------------------------------------
+
 LATEX=pdflatex -interaction=nonstopmode
+BIBTEX=bibtex
 MAKEFLAGS += --no-print-directory
 V=0
+.PHONY += default pdf $(MAIN) $(BIB) bib distclean clean _main help all try_all
 
-PHONY += default pdf $(MAIN) $(BIB) bib distclean clean _main
+ERRO=\033[1m[\033[31;1mErro\033[0;1m]\033[0m
+AVISO=\033[1m[\033[33;1mAviso\033[0;1m]\033[0m
 
-default:
-	@if test -e $(BIB); then make all; else \
-	echo "Arquivo $(BIB) não encontrado: executando apenas alvo pdf";\
+try_all:
+	@if [ -e $(BIB) ]; then make all; else \
+	echo "$(AVISO) Arquivo $(BIB) "\
+		"não encontrado: executando apenas alvo pdf";\
 	make pdf; fi
 
 debug:
@@ -24,43 +45,50 @@ _main: $(MAIN)
 
 $(MAIN):
 ifeq ($(V),0)
+	@if [ ! -f $(MAIN).tex ]; then \
+		echo "$(ERRO) Arquivo $(MAIN).tex não existe.";\
+		echo "Edite o início do Makefile para definir o nome do"\
+			 "arquivo TeX principal."; false; fi;
 	@echo "PDF"
-	@$(LATEX) $(MAIN) > /dev/null || (echo "\033[31;1mErro ao gerar PDF:"\
-						"reexecutando...\033[0m" && make debug && false)
+	@$(LATEX) $(MAIN) > /dev/null || (echo "$(ERRO) Falhou ao gerar PDF:"\
+						"re-executando...\033[0m" && make debug && false)
 else
-    $(LATEX) $(MAIN)
+	$(LATEX) $(MAIN)
 endif
 
 $(BIB):
-	@echo "\033[31;1mArquivo $(BIB) não encontrado.\033[0m"
-	@echo "Ajuda:"
+	@echo "$(ERRO) Arquivo $(BIB) não encontrado.\033[0m"
 	@make help
 	@false
 
 bib: $(BIB) _main
 ifeq ($(V),0)
 	@echo "Bibliografia"
-	@bibtex $(MAIN) > /dev/null || (echo "\033[31;1mErro ao gerar bibliografia: "\
-								"reexecute com \`make debug\`\033[0m" && false)
+	@$(BIBTEX) $(MAIN) > /dev/null || (echo "$(ERRO)  Erro ao gerar "\
+		"bibliografia: re-execute com \`make debug\`\033[0m" && false)
 	@make _main
 	@make _main
 else
-	bibtex $(MAIN)
+	$(BIBTEX) $(MAIN)
 endif
 
 distclean: clean
 	@$(RM) *.pdf
 
 clean:
-	@echo "clean"
+	@echo "Limpando"
 	@$(RM) *.aux *.bbl *.blg *.dat *.dvi *.gnuplot *.log *.nav
 	@$(RM) *.out *.snm *.toc *.vrb
 
 help:
-	@echo "\tmake\t\tGerar PDF com bibliografia"
-	@echo "\tmake all\tGerar PDF com bibliografia"
-	@echo "\tmake debug\tGerar PDF com bibliografia no modo interativo"
-	@echo "\tmake pdf\tGerar apenas o PDF"
-	@echo "\tmake clean\tApagar arquivos gerados"
-	@echo "\tmake distclean\tclean + apagar PDF gerado"
+	@echo "Comandos:"
+	@echo "    make            Gerar PDF com bibliografia"
+	@echo "    make all        Gerar PDF com bibliografia"
+	@echo "    make debug      Gerar PDF com bibliografia no modo interativo"
+	@echo "    make pdf        Gerar apenas o PDF"
+	@echo "    make clean      Apagar arquivos gerados"
+	@echo "    make distclean  clean + apagar PDF gerado"
+	@echo "Você precisa editar o arquivo Makefile (as primeiras linhas apenas)"
+	@echo "para definir o nome do arquivo principal do projeto, o nome do "
+	@echo "arquivo de bibliografia e o alvo padrão."
 
