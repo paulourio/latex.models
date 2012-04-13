@@ -19,12 +19,14 @@ default: try_all
 #-------------------------------------------------------------------------------
 SHELL=/bin/bash
 LATEX=pdflatex -interaction=nonstopmode
+LATEX_DEBUG=pdflatex\ -file-line-error\ -interaction=nonstopmode
 BIBTEX=bibtex
 MAKEFLAGS += --no-print-directory
 V=0
 .PHONY += default pdf $(MAIN) $(BIB) bib distclean clean _main help all try_all
 
 ERRO=\033[1m[\033[31;1mErro\033[0;1m]\033[0m
+FATAL=\033[1m[\033[31;1mErro Fatal\033[0;1m]\033[0m
 AVISO=\033[1m[\033[33;1mAviso\033[0;1m]\033[0m
 INFO=\033[1m[\033[34;1mDebug\033[0;1m]\033[0m
 
@@ -40,11 +42,11 @@ try_all:
 debug:
 	@echo -e "$(INFO) 0% - Gerando PDF"
 	@sleep 0.5
-	@make LATEX=pdflatex V=1 _main
+	@make LATEX=$(LATEX_DEBUG) V=1 _main
 	@echo -e "$(INFO) 25% - Gerando bibliografia"
 	@if [ -e $(BIB) ]; then \
 		sleep 0.5;\
-		make LATEX=pdflatex V=1 bib;\
+		make LATEX=$(LATEX_DEBUG) V=1 bib;\
 	else \
 		echo -e "$(AVISO) Arquivo $(BIB)"\
 			 "não encontrado. Ignorando...";\
@@ -52,12 +54,12 @@ debug:
 	fi	
 	@echo -e "$(INFO) 50% - Gerando PDF"
 	@sleep 0.5
-	@make LATEX=pdflatex V=1 _main
+	@make LATEX=$(LATEX_DEBUG) V=1 _main
 	@echo -e "$(INFO) 75% - Gerando PDF (2)"
 	@sleep 0.5
-	@make LATEX=pdflatex V=1 _main
+	@make LATEX=$(LATEX_DEBUG) V=1 _main
 	@echo -e "$(INFO) 99% - Removendo arquivos temporários"
-	@make LATEX=pdflatex V=1 clean
+	@make LATEX=$(LATEX_DEBUG) V=1 clean
 	@echo -e "$(INFO) 100% - PDF gerado.  Tamanho: `du -h $(MAIN).pdf | sed 's/\t/\tNome:\ /'`"
 
 all: 
@@ -97,7 +99,15 @@ ifeq ($(V),0)
 		sleep 0.6;\
 		make debug; false)
 else
-	$(LATEX) $(MAIN)
+	@($(LATEX) $(MAIN) || echo "$$?">$(MAIN).err) | \
+		sed -r "s/^(.*)\:([0-9]+)\:/\n`printf "$(ERRO)"` Arquivo `printf "\033[1m"`\1`printf "\033[0m"` linha `printf "\033[1m"`\2`printf "\033[0m"`:/g" |\
+		sed -r "s/\(([^ ^\)]+\.tex)\)? ?/\n`printf "$(INFO)\033[32m"` Processando arquivo \1`printf "\033[0m"`\n/g" |\
+		sed -r "s/Package (.*) Warning: ?/`printf "$(AVISO)"` \1: /g" |\
+		sed -r "s/LaTeX Warning:/`printf "$(AVISO)"`/g" |\
+		sed -r "s/! Emergency stop./`printf "$(AVISO)"` Parada de emergência./g" |\
+		sed -r "s/(! *==> Fatal error occurred, ?)(.*)/`printf "$(FATAL)"` \2./g" |\
+		grep -E '(Aviso)|(Erro)|(Debug)' | grep -v 'Citation'
+	@if [ -f $(MAIN).err ]; then echo -e "$(INFO) Parando (código = `cat $(MAIN).err`)."; false; fi
 endif
 
 $(BIB):
@@ -114,7 +124,7 @@ ifeq ($(V),0)
 		sleep 2;\
 		make debug; false)
 else
-	$(BIBTEX) $(MAIN)
+	$(BIBTEX) $(MAIN) 
 endif
 
 distclean: clean
