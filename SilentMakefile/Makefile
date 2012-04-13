@@ -3,6 +3,7 @@
 # Licença: FreeBSD
 
 # Nome do arquivo principal do seu projeto
+# Não coloque com a extensão do arquivo. Se for "trab.tex": MAIN=trab
 MAIN=main
 # Nome do arquivo de referências.  Pode ser utilizado caminho relativo
 # como BIB=../../bibliografia.bib
