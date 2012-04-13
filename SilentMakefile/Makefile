@@ -6,10 +6,14 @@ V=0
 
 PHONY += default pdf $(MAIN) $(BIB) bib distclean clean _main
 
-default: all
+default:
+	@if test -e $(BIB); then make all; else \
+	echo "Arquivo $(BIB) não encontrado: executando apenas alvo pdf";\
+	make pdf; fi
 
 debug:
-	@make LATEX=pdflatex V=1 all 
+	@make LATEX=pdflatex V=1 _main
+	@make LATEX=pdflatex V=1 bib
 
 all: bib pdf
 	@echo "\033[32;1mOK\033[0m"
@@ -20,11 +24,11 @@ _main: $(MAIN)
 
 $(MAIN):
 ifeq ($(V),0)
-		@echo "PDF"
-		@$(LATEX) $(MAIN) > /dev/null || (echo "\033[31;1mErro ao gerar PDF:"\
-							"reexecutando...\033[0m" && make debug && false)
+	@echo "PDF"
+	@$(LATEX) $(MAIN) > /dev/null || (echo "\033[31;1mErro ao gerar PDF:"\
+						"reexecutando...\033[0m" && make debug && false)
 else
-	    $(LATEX) $(MAIN)
+    $(LATEX) $(MAIN)
 endif
 
 $(BIB):
