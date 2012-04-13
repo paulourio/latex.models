@@ -7,7 +7,7 @@
 MAIN=main
 # Nome completo do arquivo de referências (com a extensão).  Pode ser utilizado
 # caminho relativo como BIB=../../bibliografia.bib
-BIB=referencias.bib
+BIB=main.bib
 # Comportamento padrão para o comando make sem argumentos.
 # Possibilidades: 
 #   try_all     Tenta gerar com bibliografia.  Se o arquivo não
@@ -17,7 +17,7 @@ BIB=referencias.bib
 default: try_all
 
 #-------------------------------------------------------------------------------
-
+SHELL=/bin/bash
 LATEX=pdflatex -interaction=nonstopmode
 BIBTEX=bibtex
 MAKEFLAGS += --no-print-directory
@@ -32,68 +32,87 @@ try_all:
 	@if [ -e $(BIB) ]; then \
 		make all; \
 	else \
-		echo "$(AVISO) Arquivo $(BIB)"\
+		echo -e "$(AVISO) Arquivo $(BIB)"\
 			 "não encontrado: executando apenas alvo pdf";\
 		make pdf;\
 	fi
 
 debug:
-	@echo "$(INFO) 0% - Gerando PDF"
+	@echo -e "$(INFO) 0% - Gerando PDF"
 	@sleep 0.5
 	@make LATEX=pdflatex V=1 _main
-	@echo "$(INFO) 25% - Gerando bibliografia"
+	@echo -e "$(INFO) 25% - Gerando bibliografia"
 	@if [ -e $(BIB) ]; then \
-		@sleep 0.5;\
-		@make LATEX=pdflatex V=1 bib;\
+		sleep 0.5;\
+		make LATEX=pdflatex V=1 bib;\
 	else \
-		echo "$(AVISO) Arquivo $(BIB)"\
+		echo -e "$(AVISO) Arquivo $(BIB)"\
 			 "não encontrado. Ignorando...";\
 		sleep 1;\
 	fi	
-	@echo "$(INFO) 50% - Gerando PDF"
+	@echo -e "$(INFO) 50% - Gerando PDF"
 	@sleep 0.5
 	@make LATEX=pdflatex V=1 _main
-	@echo "$(INFO) 75% - Gerando PDF (2)"
+	@echo -e "$(INFO) 75% - Gerando PDF (2)"
 	@sleep 0.5
 	@make LATEX=pdflatex V=1 _main
-	@echo "$(INFO) 99% - Removendo arquivos temporários"
+	@echo -e "$(INFO) 99% - Removendo arquivos temporários"
 	@make LATEX=pdflatex V=1 clean
-	@echo "$(INFO) 100% - PDF gerado.  Tamanho: `du -h $(MAIN).pdf | sed 's/\t/\tNome:\ /'`"
+	@echo -e "$(INFO) 100% - PDF gerado.  Tamanho: `du -h $(MAIN).pdf | sed 's/\t/\tNome:\ /'`"
 
-all: bib pdf
-	@echo "\033[32;1mOK\033[0m"
+all: 
+	@echo -ne "0%    "
+	@make bib
+	@echo -ne "\r35%  "
+	@make _main
+	@echo -ne "\r65%  "
+	@make _main
+	@echo -ne "\r90%  "
+	@make clean
+	@echo -e "\r100%  Tamanho: `du -h $(MAIN).pdf | sed 's/\t/\tNome:\ /'`"
 
-pdf: _main clean
+pdf:
+	@echo -ne "\r0%       "
+	@make _main
+	@echo -ne "\r50%      "
+	@make _main
+	@echo -ne "\r90%      "
+	@make clean
+	@echo -e "\r100%  Tamanho: `du -h $(MAIN).pdf | sed 's/\t/\tNome:\ /'`"
 
 _main: $(MAIN)
 
 $(MAIN):
 ifeq ($(V),0)
 	@if [ ! -f $(MAIN).tex ]; then \
-		echo "$(ERRO) Arquivo $(MAIN).tex não existe.";\
-		echo "Edite o início do Makefile para definir o nome do"\
+		echo -e "\n$(ERRO) Arquivo $(MAIN).tex não existe.";\
+		echo -e "Edite o início do Makefile para definir o nome do"\
 			 "arquivo TeX principal.";\
 		false;\
 	fi;
-	@echo "PDF"
-	@$(LATEX) $(MAIN) > /dev/null || (echo "$(ERRO) Falhou ao gerar PDF:"\
-						"re-executando...\033[0m" && make debug && false)
+	@$(LATEX) $(MAIN) > /dev/null || (\
+		echo -e "\n$(ERRO)  Erro ao gerar PDF";\
+		sleep 0.4;\
+		echo -e "$(INFO) Entrando em modo debug";\
+		sleep 0.6;\
+		make debug; false)
 else
 	$(LATEX) $(MAIN)
 endif
 
 $(BIB):
-	@echo "$(ERRO) Arquivo $(BIB) não encontrado.\033[0m"
+	@echo -e "$(ERRO) Arquivo $(BIB) não encontrado.\033[0m"
 	@make help
 	@false
 
 bib: $(BIB) _main
 ifeq ($(V),0)
-	@echo "Bibliografia"
-	@$(BIBTEX) $(MAIN) > /dev/null || (echo "$(ERRO)  Erro ao gerar "\
-		"bibliografia: re-execute com \`make debug\`\033[0m" && false)
-	@make _main
-	@make _main
+	@$(BIBTEX) $(MAIN) > /dev/null || (\
+		echo -e "\n$(ERRO)  Erro ao gerar bibliografia\033[0m";\
+		sleep 1;\
+		echo -e "$(INFO) Entrando em modo debug";\
+		sleep 2;\
+		make debug; false)
 else
 	$(BIBTEX) $(MAIN)
 endif
