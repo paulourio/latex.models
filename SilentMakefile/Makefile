@@ -5,14 +5,14 @@
 # Nome do arquivo principal do seu projeto
 # Não coloque com a extensão do arquivo. Se for "trab.tex": MAIN=trab
 MAIN=main
-# Nome do arquivo de referências.  Pode ser utilizado caminho relativo
-# como BIB=../../bibliografia.bib
+# Nome completo do arquivo de referências (com a extensão).  Pode ser utilizado
+# caminho relativo como BIB=../../bibliografia.bib
 BIB=referencias.bib
 # Comportamento padrão para o comando make sem argumentos.
 # Possibilidades: 
-#	try_all		Tenta gerar com bibliografia.  Se o arquivo não
-#							existir o alvo será redirecionado para 'pdf'
-#	pdf			Executa apenas o alvo PDF por padrão.
+#   try_all     Tenta gerar com bibliografia.  Se o arquivo não
+#               existir o alvo será redirecionado para 'pdf'
+#   pdf         Executa apenas o alvo PDF por padrão.
 # Veja 'make help' para mais opções de alvos.
 default: try_all
 
@@ -89,7 +89,7 @@ help:
 	@echo "    make pdf        Gerar apenas o PDF"
 	@echo "    make clean      Apagar arquivos gerados"
 	@echo "    make distclean  clean + apagar PDF gerado"
-	@echo "Você precisa editar o arquivo Makefile (as primeiras linhas apenas)"
-	@echo "para definir o nome do arquivo principal do projeto, o nome do "
-	@echo "arquivo de bibliografia e o alvo padrão."
+	@echo "Configuração:"
+	@echo "    Este Makefile trabalha com apenas um arquivo .tex e um .bib"
+	@echo "    Você precisa editar o arquivo Makefile para definir estes arquivos."
 
