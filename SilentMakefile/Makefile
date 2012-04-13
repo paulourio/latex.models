@@ -39,23 +39,26 @@ try_all:
 
 debug:
 	@echo "$(INFO) 0% - Gerando PDF"
-	@sleep 1
+	@sleep 0.5
 	@make LATEX=pdflatex V=1 _main
 	@echo "$(INFO) 25% - Gerando bibliografia"
 	@if [ -e $(BIB) ]; then \
-		@sleep 1;\
+		@sleep 0.5;\
 		@make LATEX=pdflatex V=1 bib;\
 	else \
 		echo "$(AVISO) Arquivo $(BIB)"\
 			 "não encontrado. Ignorando...";\
-		sleep 2;\
+		sleep 1;\
 	fi	
 	@echo "$(INFO) 50% - Gerando PDF"
-	@sleep 1
+	@sleep 0.5
 	@make LATEX=pdflatex V=1 _main
-	@echo "$(INFO) 75% - Gerando PDF e limpando"
-	@sleep 1
-	@make LATEX=pdflatex V=1 pdf
+	@echo "$(INFO) 75% - Gerando PDF (2)"
+	@sleep 0.5
+	@make LATEX=pdflatex V=1 _main
+	@echo "$(INFO) 99% - Removendo arquivos temporários"
+	@make LATEX=pdflatex V=1 clean
+	@echo "$(INFO) 100% - PDF gerado.  Tamanho: `du -h $(MAIN).pdf | sed 's/\t/\tNome:\ /'`"
 
 all: bib pdf
 	@echo "\033[32;1mOK\033[0m"
@@ -99,13 +102,12 @@ distclean: clean
 	@$(RM) *.pdf
 
 clean:
-	@echo "Limpando"
 	@$(RM) *.aux *.bbl *.blg *.dat *.dvi *.gnuplot *.log *.nav
 	@$(RM) *.out *.snm *.toc *.vrb
 
 help:
 	@echo "Comandos:"
-	@echo "    make            Gerar PDF com bibliografia"
+	@echo "    make            Gerar alvo padrão (veja 'default' no Makefile)"
 	@echo "    make all        Gerar PDF com bibliografia"
 	@echo "    make debug      Gerar PDF com bibliografia no modo interativo"
 	@echo "    make pdf        Gerar apenas o PDF"
