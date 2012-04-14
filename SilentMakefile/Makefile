@@ -100,12 +100,13 @@ ifeq ($(V),0)
 		make debug; false)
 else
 	@($(LATEX) $(MAIN) || echo "$$?">$(MAIN).err) | \
-		sed -r "s/^(.*)\:([0-9]+)\:/\n`printf "$(ERRO)"` Arquivo `printf "\033[1m"`\1`printf "\033[0m"` linha `printf "\033[1m"`\2`printf "\033[0m"`:/g" |\
+		sed -r "s/^(.*)\:([0-9]+)\:/\n`printf "$(ERRO)"` `printf "\033[1m"`\1`printf "\033[0m"` linha `printf "\033[1m"`\2`printf "\033[0m"`:/g" |\
 		sed -r "s/\(([^ ^\)]+\.tex)\)? ?/\n`printf "$(INFO)\033[32m"` Processando arquivo \1`printf "\033[0m"`\n/g" |\
 		sed -r "s/Package (.*) Warning: ?/`printf "$(AVISO)"` \1: /g" |\
-		sed -r "s/LaTeX Warning:/`printf "$(AVISO)"`/g" |\
+		sed -r "s/LaTeX Warning:/\n`printf "$(AVISO)"`/g" |\
+		sed -r "s/LaTeX Error:/\n`printf "$(ERRO)"`/g" |\
 		sed -r "s/! Emergency stop./`printf "$(AVISO)"` Parada de emergência./g" |\
-		sed -r "s/(! *==> Fatal error occurred, ?)(.*)/`printf "$(FATAL)"` \2./g" |\
+		sed -r "s/(==> Fatal error occurred, ?)(.*)/\n`printf "$(FATAL)"` \2./g" |\
 		grep -E '(Aviso)|(Erro)|(Debug)' | grep -v 'Citation'
 	@if [ -f $(MAIN).err ]; then echo -e "$(INFO) Parando (código = `cat $(MAIN).err`)."; false; fi
 endif
