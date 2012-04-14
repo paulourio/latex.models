@@ -133,7 +133,7 @@ distclean: clean
 
 clean:
 	@$(RM) *.aux *.bbl *.blg *.dat *.dvi *.gnuplot *.log *.nav
-	@$(RM) *.out *.snm *.toc *.vrb
+	@$(RM) *.out *.snm *.toc *.vrb *.err
 
 help:
 	@echo "Comandos:"
