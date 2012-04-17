@@ -24,7 +24,7 @@ BIBTEX=bibtex
 MAKEFLAGS += --no-print-directory
 V=0
 .PHONY += default pdf $(MAIN) $(BIB) bib distclean clean _main help all try_all
-
+PROGRESS=$(MAIN).pgs
 ERRO=\033[1m[\033[31;1mErro\033[0;1m]\033[0m
 FATAL=\033[1m[\033[31;1mErro Fatal\033[0;1m]\033[0m
 AVISO=\033[1m[\033[33;1mAviso\033[0;1m]\033[0m
@@ -63,24 +63,24 @@ debug:
 	@echo -e "$(INFO) 100% - PDF gerado.  Tamanho: `du -h $(MAIN).pdf | sed 's/\t/\tNome:\ /'`"
 
 all: 
-	@echo -ne "0%    "
+	@echo 0 > $(PROGRESS)
 	@make bib
-	@echo -ne "\r35%  "
+	@echo 35 > $(PROGRESS)
 	@make _main
-	@echo -ne "\r65%  "
+	@echo 65 > $(PROGRESS)
 	@make _main
-	@echo -ne "\r90%  "
+	@echo 90 > $(PROGRESS)
 	@make clean
-	@echo -e "\r100%  Tamanho: `du -h $(MAIN).pdf | sed 's/\t/\tNome:\ /'`"
+	@echo -e "\033[2K\r100%  Tamanho: `du -h $(MAIN).pdf | sed 's/\t/\tNome:\ /'`"
 
 pdf:
-	@echo -ne "\r0%       "
+	@echo 0 > $(PROGRESS)
 	@make _main
-	@echo -ne "\r50%      "
+	@echo 50 > $(PROGRESS)
 	@make _main
-	@echo -ne "\r90%      "
+	@echo 90 > $(PROGRESS)
 	@make clean
-	@echo -e "\r100%  Tamanho: `du -h $(MAIN).pdf | sed 's/\t/\tNome:\ /'`"
+	@echo -e "\033[2K\r100%  Tamanho: `du -h $(MAIN).pdf | sed 's/\t/\tNome:\ /'`"
 
 _main: $(MAIN)
 
@@ -92,7 +92,10 @@ ifeq ($(V),0)
 			 "arquivo TeX principal.";\
 		false;\
 	fi;
-	@$(LATEX) $(MAIN) > /dev/null || (\
+	@($(LATEX) $(MAIN) > /dev/null & \
+		while [ -d "/proc/$$!" ] ; do sleep 0.03; \
+			echo -e "$$(($$(cat $(PROGRESS)) + 1))" > $(PROGRESS); \
+			echo -en "\033[2K\r`cat $(PROGRESS)`%"; done) || (\
 		echo -e "\n$(ERRO)  Erro ao gerar PDF";\
 		sleep 0.4;\
 		echo -e "$(INFO) Entrando em modo debug";\
@@ -107,7 +110,7 @@ else
 		sed -r "s/LaTeX Error:/\n`printf "$(ERRO)"`/g" |\
 		sed -r "s/! Emergency stop./`printf "$(AVISO)"` Parada de emergência./g" |\
 		sed -r "s/(==> Fatal error occurred, ?)(.*)/\n`printf "$(FATAL)"` \2./g" |\
-		grep -E '(Aviso)|(Erro)|(Debug)' | grep -v 'Citation'
+		grep -E '(Aviso)|(Erro)|(Debug)' | grep -v 'Citation' | grep -v 'texmf'
 	@if [ -f $(MAIN).err ]; then echo -e "$(INFO) Parando (código = `cat $(MAIN).err`)."; false; fi
 endif
 
@@ -133,7 +136,7 @@ distclean: clean
 
 clean:
 	@$(RM) *.aux *.bbl *.blg *.dat *.dvi *.gnuplot *.log *.nav
-	@$(RM) *.out *.snm *.toc *.vrb *.err
+	@$(RM) *.out *.snm *.toc *.vrb *.err *.mpgs
 
 help:
 	@echo "Comandos:"
