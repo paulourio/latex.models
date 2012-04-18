@@ -92,10 +92,12 @@ ifeq ($(V),0)
 			 "arquivo TeX principal.";\
 		false;\
 	fi;
-	@($(LATEX) $(MAIN) > /dev/null & \
-		while [ -d "/proc/$$!" ] ; do sleep 0.03; \
+	@($(LATEX) $(MAIN) > /dev/null & latexpid=$$!; \
+		(while [ -d "/proc/$$latexpid" ] ; do \
 			echo -e "$$(($$(cat $(PROGRESS)) + 1))" > $(PROGRESS); \
-			echo -en "\033[2K\r`cat $(PROGRESS)`%"; done) || (\
+			echo -en "\033[2K\r`cat $(PROGRESS)`%"; ex=$$?; \
+			sleep 0.03; done &); \
+			wait $$latexpid; exit $$?) || (\
 		echo -e "\n$(ERRO)  Erro ao gerar PDF";\
 		sleep 0.4;\
 		echo -e "$(INFO) Entrando em modo debug";\
@@ -107,6 +109,7 @@ else
 		sed -r "s/\(([^ ^\)]+\.tex)\)? ?/\n`printf "$(INFO)\033[32m"` Processando arquivo \1`printf "\033[0m"`\n/g" |\
 		sed -r "s/Package (.*) Warning: ?/`printf "$(AVISO)"` \1: /g" |\
 		sed -r "s/LaTeX Warning:/\n`printf "$(AVISO)"`/g" |\
+		sed -r "s/! File ended while/\n`printf "$(ERRO)"` File ended while/g" |\
 		sed -r "s/LaTeX Error:/\n`printf "$(ERRO)"`/g" |\
 		sed -r "s/! Emergency stop./`printf "$(AVISO)"` Parada de emergência./g" |\
 		sed -r "s/(==> Fatal error occurred, ?)(.*)/\n`printf "$(FATAL)"` \2./g" |\
