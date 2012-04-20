@@ -30,6 +30,8 @@ FATAL=\033[1m[\033[31;1mErro Fatal\033[0;1m]\033[0m
 AVISO=\033[1m[\033[33;1mAviso\033[0;1m]\033[0m
 INFO=\033[1m[\033[34;1mDebug\033[0;1m]\033[0m
 
+export TEXINPUTS=$(shell kpsepath tex):$(shell pwd)/
+
 try_all:
 	@if [ -e $(BIB) ]; then \
 		make all; \
@@ -102,7 +104,7 @@ ifeq ($(V),0)
 		sleep 0.4;\
 		echo -e "$(INFO) Entrando em modo debug";\
 		sleep 0.6;\
-		make debug; false)
+		make debug; make clean; false)
 else
 	@($(LATEX) $(MAIN) || echo "$$?">$(MAIN).err) | \
 		sed -r "s/^(.*)\:([0-9]+)\:/\n`printf "$(ERRO)"` `printf "\033[1m"`\1`printf "\033[0m"` linha `printf "\033[1m"`\2`printf "\033[0m"`:/g" |\
@@ -114,7 +116,8 @@ else
 		sed -r "s/! Emergency stop./`printf "$(AVISO)"` Parada de emergência./g" |\
 		sed -r "s/(==> Fatal error occurred, ?)(.*)/\n`printf "$(FATAL)"` \2./g" |\
 		grep -E '(Aviso)|(Erro)|(Debug)' | grep -v 'Citation' | grep -v 'texmf'
-	@if [ -f $(MAIN).err ]; then echo -e "$(INFO) Parando (código = `cat $(MAIN).err`)."; false; fi
+	@if [ -f $(MAIN).err ]; then echo -e "$(INFO) Parando (código = `cat $(MAIN).err`).";\
+		make clean; false; fi
 endif
 
 $(BIB):
@@ -129,7 +132,7 @@ ifeq ($(V),0)
 		sleep 1;\
 		echo -e "$(INFO) Entrando em modo debug";\
 		sleep 2;\
-		make debug; false)
+		make debug; make clean; false)
 else
 	$(BIBTEX) $(MAIN) 
 endif
