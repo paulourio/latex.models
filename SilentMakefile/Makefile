@@ -18,8 +18,8 @@ default: try_all
 
 #-------------------------------------------------------------------------------
 SHELL=/bin/bash
-LATEX=pdflatex -interaction=nonstopmode
-LATEX_DEBUG=pdflatex\ -file-line-error\ -interaction=nonstopmode
+LATEX=pdflatex -interaction=nonstopmode -shell-escape
+LATEX_DEBUG=pdflatex\ -file-line-error\ -interaction=nonstopmode\ -shell-escape
 BIBTEX=bibtex
 MAKEFLAGS += --no-print-directory
 V=0
@@ -43,11 +43,11 @@ try_all:
 
 debug:
 	@echo -e "$(INFO) 0% - Gerando PDF"
-	@sleep 0.5
+	@sleep 0.3
 	@make LATEX=$(LATEX_DEBUG) V=1 _main
 	@echo -e "$(INFO) 25% - Gerando bibliografia"
 	@if [ -e $(BIB) ]; then \
-		sleep 0.5;\
+		sleep 0.3;\
 		make LATEX=$(LATEX_DEBUG) V=1 bib;\
 	else \
 		echo -e "$(AVISO) Arquivo $(BIB)"\
@@ -55,10 +55,10 @@ debug:
 		sleep 1;\
 	fi	
 	@echo -e "$(INFO) 50% - Gerando PDF"
-	@sleep 0.5
+	@sleep 0.3
 	@make LATEX=$(LATEX_DEBUG) V=1 _main
 	@echo -e "$(INFO) 75% - Gerando PDF (2)"
-	@sleep 0.5
+	@sleep 0.3
 	@make LATEX=$(LATEX_DEBUG) V=1 _main
 	@echo -e "$(INFO) 99% - Removendo arquivos temporários"
 	@make LATEX=$(LATEX_DEBUG) V=1 clean
@@ -96,9 +96,9 @@ ifeq ($(V),0)
 	fi;
 	@($(LATEX) $(MAIN) > /dev/null & latexpid=$$!; \
 		(while [ -d "/proc/$$latexpid" ] ; do \
-			echo -e "$$(($$(cat $(PROGRESS)) + 1))" > $(PROGRESS); \
+			echo -e "$$(($$(cat $(PROGRESS)) + 3))" > $(PROGRESS); \
 			echo -en "\033[2K\r`cat $(PROGRESS)`%"; ex=$$?; \
-			sleep 0.03; done &); \
+			sleep 0.08; done &); \
 			wait $$latexpid; exit $$?) || (\
 		echo -e "\n$(ERRO)  Erro ao gerar PDF";\
 		sleep 0.4;\
@@ -142,7 +142,7 @@ distclean: clean
 
 clean:
 	@$(RM) *.aux *.bbl *.blg *.dat *.dvi *.gnuplot *.log *.nav
-	@$(RM) *.out *.snm *.toc *.vrb *.err *.mpgs
+	@$(RM) *.out *.snm *.toc *.vrb *.err *.mpgs *.table
 
 help:
 	@echo "Comandos:"
