@@ -47,7 +47,7 @@ export TEXINPUTS=$(shell kpsepath tex):$(shell pwd)/
 # Arquivo temporário para armazenar o progresso atual
 PROGRESS=$(MAIN).mpgs
 # Mensagens mostradas no terminal no formato "[tipo] mensagem"
-ERRO=Erro\033[0;1m]\033[0m
+ERRO=\033[1m[\033[31;1mErro\033[0;1m]\033[0m
 FATAL=\033[1m[\033[31;1mErro Fatal\033[0;1m]\033[0m
 AVISO=\033[1m[\033[33;1mAviso\033[0;1m]\033[0m
 INFO=\033[1m[\033[34;1mDebug\033[0;1m]\033[0m
