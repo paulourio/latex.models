@@ -2,12 +2,15 @@
 # Autor: Paulo Roberto Urio (paulourio gmail com)
 # Licença: FreeBSD
 
+#------------------------- Configurações Básicas -------------------------------
+
 # Nome do arquivo principal do seu projeto
 # Não coloque com a extensão do arquivo. Se for "trab.tex": MAIN=trab
 MAIN=main
 # Nome completo do arquivo de referências (com a extensão).  Pode ser utilizado
 # caminho relativo como BIB=../../bibliografia.bib
-BIB=main.bib
+# Deixe-o vazio para detecção automática (experimental)
+BIB=
 # Comportamento padrão para o comando make sem argumentos.
 # Possibilidades: 
 #   try_all     Tenta gerar com bibliografia.  Se o arquivo não
@@ -16,49 +19,80 @@ BIB=main.bib
 # Veja 'make help' para mais opções de alvos.
 default: try_all
 
-#-------------------------------------------------------------------------------
-SHELL=/bin/bash
-LATEX=pdflatex -interaction=nonstopmode -shell-escape
-LATEX_DEBUG=pdflatex\ -file-line-error\ -interaction=nonstopmode\ -shell-escape
-BIBTEX=bibtex
-MAKEFLAGS += --no-print-directory
+# PB_ são propriedades da porcentagem mostrada enquanto o PDF é gerado.
+# Os valores descrevem o comportamento da porcentagem simulada.  Você pode
+# configurar os valores, caso a porcetagem esteja passando de 100% durante
+# o processo.
+# Incremento do valor de porcentagem concluído.
+PB_STEP=3
+# Intervalo entre cada incremento (segundos).
+PB_DELAY=0.08
+
+#------------------------- Configurações Avançadas------------------------------
+
+# Delay entre cada mensagem no modo debug.
+DEBUG_DELAY=0.3
+# Delay entre mostrar um erro e iniciar o modo debug.
+ERROR_DELAY=0.6
+# Verbosity padrão.  1 = Não esconder saída das execuções; 0 = Esconder
 V=0
-.PHONY += default pdf $(MAIN) $(BIB) bib distclean clean _main help all try_all
+# Linha de comando para executar pdflatex
+LATEX=pdflatex -interaction=nonstopmode -shell-escape
+# Linha de comando para executar pdflatex. Passado como argumento ao modo
+# debug, por isso os espaços devem ser "\ "
+LATEX_DEBUG=pdflatex\ -file-line-error\ -interaction=nonstopmode\ -shell-escape
+# Programa para gerar bibliografia
+BIBTEX=bibtex
+# Diretórios de busca
+export TEXINPUTS=$(shell kpsepath tex):$(shell pwd)/
+# Arquivo temporário para armazenar o progresso atual
 PROGRESS=$(MAIN).mpgs
+# Mensagens mostradas no terminal no formato "[tipo] mensagem"
 ERRO=\033[1m[\033[31;1mErro\033[0;1m]\033[0m
 FATAL=\033[1m[\033[31;1mErro Fatal\033[0;1m]\033[0m
 AVISO=\033[1m[\033[33;1mAviso\033[0;1m]\033[0m
 INFO=\033[1m[\033[34;1mDebug\033[0;1m]\033[0m
+# Shell para execução dos comandos. Nota: não funciona bem com /bin/sh
+SHELL=/bin/bash
+# Parâmetros para o make
+MAKEFLAGS += --no-print-directory
 
-export TEXINPUTS=$(shell kpsepath tex):$(shell pwd)/
+#--------------------------------- Alvos ---------------------------------------
+.PHONY += default pdf $(MAIN) $(BIB) bib distclean clean _main help all try_all
 
 try_all:
-	@if [ -e $(BIB) ]; then \
-		make all; \
+	@if [ -z "$(BIB)" ]; then \
+		findbib=$$(find . -type f -iname "*.tex" | xargs grep -E '\\bibliography{(.*)}' | grep -o '{.*}' | sed 's/[{}]//g');\
+		echo "Experimental: usando $$findbib.bib como bibliografia"; \
+		make BIB=$$findbib.bib; \
 	else \
-		echo -e "$(AVISO) Arquivo $(BIB)"\
-			 "não encontrado: executando apenas alvo pdf";\
-		make pdf;\
+		if [ -e $(BIB) ]; then \
+			make all; \
+		else \
+			echo -e "$(AVISO) Arquivo $(BIB)"\
+				 "não encontrado: executando apenas alvo pdf";\
+			make pdf;\
+		fi \
 	fi
 
 debug:
 	@echo -e "$(INFO) 0% - Gerando PDF"
-	@sleep 0.3
+	@sleep $(DEBUG_DELAY)
 	@make LATEX=$(LATEX_DEBUG) V=1 _main
 	@echo -e "$(INFO) 25% - Gerando bibliografia"
 	@if [ -e $(BIB) ]; then \
-		sleep 0.3;\
+		sleep $(DEBUG_DELAY);\
 		make LATEX=$(LATEX_DEBUG) V=1 bib;\
 	else \
 		echo -e "$(AVISO) Arquivo $(BIB)"\
 			 "não encontrado. Ignorando...";\
-		sleep 1;\
+		sleep $(DEBUG_DELAY);\
 	fi	
 	@echo -e "$(INFO) 50% - Gerando PDF"
-	@sleep 0.3
+	@sleep $(DEBUG_DELAY)
 	@make LATEX=$(LATEX_DEBUG) V=1 _main
 	@echo -e "$(INFO) 75% - Gerando PDF (2)"
-	@sleep 0.3
+	@sleep $(DEBUG_DELAY)
 	@make LATEX=$(LATEX_DEBUG) V=1 _main
 	@echo -e "$(INFO) 99% - Removendo arquivos temporários"
 	@make LATEX=$(LATEX_DEBUG) V=1 clean
@@ -92,18 +126,19 @@ ifeq ($(V),0)
 		echo -e "\n$(ERRO) Arquivo $(MAIN).tex não existe.";\
 		echo -e "Edite o início do Makefile para definir o nome do"\
 			 "arquivo TeX principal.";\
+		make clean;\
 		false;\
 	fi;
 	@($(LATEX) $(MAIN) > /dev/null & latexpid=$$!; \
 		(while [ -d "/proc/$$latexpid" ] ; do \
-			echo -e "$$(($$(cat $(PROGRESS)) + 3))" > $(PROGRESS); \
+			echo -e "$$(($$(cat $(PROGRESS)) + $(PB_STEP)))" > $(PROGRESS); \
 			echo -en "\033[2K\r`cat $(PROGRESS)`%"; ex=$$?; \
-			sleep 0.08; done &); \
+			sleep $(PB_DELAY); done &); \
 			wait $$latexpid; exit $$?) || (\
 		echo -e "\n$(ERRO)  Erro ao gerar PDF";\
-		sleep 0.4;\
+		sleep $(ERROR_DELAY);\
 		echo -e "$(INFO) Entrando em modo debug";\
-		sleep 0.6;\
+		sleep $(DEBUG_DELAY);\
 		make debug; make clean; false)
 else
 	@($(LATEX) $(MAIN) || echo "$$?">$(MAIN).err) | \
@@ -129,9 +164,9 @@ bib: $(BIB) _main
 ifeq ($(V),0)
 	@$(BIBTEX) $(MAIN) > /dev/null || (\
 		echo -e "\n$(ERRO)  Erro ao gerar bibliografia\033[0m";\
-		sleep 1;\
+		sleep $(ERROR_DELAY);\
 		echo -e "$(INFO) Entrando em modo debug";\
-		sleep 2;\
+		sleep $(DEBUG_DELAY);\
 		make debug; make clean; false)
 else
 	$(BIBTEX) $(MAIN) 
