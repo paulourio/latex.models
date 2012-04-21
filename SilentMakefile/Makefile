@@ -19,6 +19,8 @@ BIB=
 # Veja 'make help' para mais opções de alvos.
 default: try_all
 
+#------------------------- Configurações Avançadas------------------------------
+
 # PB_ são propriedades da porcentagem mostrada enquanto o PDF é gerado.
 # Os valores descrevem o comportamento da porcentagem simulada.  Você pode
 # configurar os valores, caso a porcetagem esteja passando de 100% durante
@@ -27,9 +29,6 @@ default: try_all
 PB_STEP=3
 # Intervalo entre cada incremento (segundos).
 PB_DELAY=0.08
-
-#------------------------- Configurações Avançadas------------------------------
-
 # Delay entre cada mensagem no modo debug.
 DEBUG_DELAY=0.3
 # Delay entre mostrar um erro e iniciar o modo debug.
@@ -48,7 +47,7 @@ export TEXINPUTS=$(shell kpsepath tex):$(shell pwd)/
 # Arquivo temporário para armazenar o progresso atual
 PROGRESS=$(MAIN).mpgs
 # Mensagens mostradas no terminal no formato "[tipo] mensagem"
-ERRO=\033[1m[\033[31;1mErro\033[0;1m]\033[0m
+ERRO=Erro\033[0;1m]\033[0m
 FATAL=\033[1m[\033[31;1mErro Fatal\033[0;1m]\033[0m
 AVISO=\033[1m[\033[33;1mAviso\033[0;1m]\033[0m
 INFO=\033[1m[\033[34;1mDebug\033[0;1m]\033[0m
