@@ -1,0 +1,11 @@
+In order to run LaTeX, you need to add "data" folder into the search path of
+pdflatex.  If you use Makefile's, add this line:
+
+export TEXINPUTS=$(shell kpsepath tex):$(shell pwd)/data/
+
+Também passe o argumento -shell-escape para o pdflatex permitir que o
+gnuplot seja executado, para gerar os gráficos.
+
+--
+
+O gnuplot cria arquivos com extensão .table
