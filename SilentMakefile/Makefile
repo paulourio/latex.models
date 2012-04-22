@@ -51,6 +51,10 @@ BIBTEX=bibtex
 export TEXINPUTS=$(shell kpsepath tex):$(shell pwd)/
 # Arquivo temporário para armazenar o progresso atual
 PROGRESS=$(MAIN).mpgs
+# Arquivo temporário com os temos de execução
+TIMING_LOG=$(MAIN).timing.log
+# Execução do programa para contar o tempo de execução
+TIME=/usr/bin/time --format=%e -o $(TIMING_LOG) -a --quiet
 # Mensagens mostradas no terminal no formato "[tipo] mensagem"
 ERRO=\033[1m[\033[31;1mErro\033[0;1m]\033[0m
 FATAL=\033[1m[\033[31;1mErro Fatal\033[0;1m]\033[0m
@@ -108,23 +112,25 @@ debug:
 
 all: 
 	@echo 0 > $(PROGRESS)
-	@make bib
+	@$(TIME) make bib
 	@echo 35 > $(PROGRESS)
-	@make _main
+	@$(TIME) make _main
 	@echo 65 > $(PROGRESS)
-	@make _main
+	@$(TIME) make _main
 	@echo 90 > $(PROGRESS)
+	@echo -ne "\033[2K\r100%  Tamanho: `du -h $(MAIN).pdf | sed 's/\t/\tNome:\ /'`"
+	@echo -e "\t (`cat $(TIMING_LOG) | tr '\n' '+' | sed 's/+$$/\n/' | bc`s)"
 	@make clean
-	@echo -e "\033[2K\r100%  Tamanho: `du -h $(MAIN).pdf | sed 's/\t/\tNome:\ /'`"
 
 pdf:
 	@echo 0 > $(PROGRESS)
-	@make _main
+	@$(TIME) make _main
 	@echo 50 > $(PROGRESS)
-	@make _main
+	@$(TIME) make _main
 	@echo 90 > $(PROGRESS)
+	@echo -en "\033[2K\r100%  Tamanho: `du -h $(MAIN).pdf | sed 's/\t/\tNome:\ /'`"
+	@echo -e "\t (`cat $(TIMING_LOG) | tr '\n' '+' | sed 's/+$$/\n/' | bc`s)"
 	@make clean
-	@echo -e "\033[2K\r100%  Tamanho: `du -h $(MAIN).pdf | sed 's/\t/\tNome:\ /'`"
 
 _main: $(MAIN)
 
