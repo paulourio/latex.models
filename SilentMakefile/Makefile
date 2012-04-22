@@ -22,13 +22,18 @@ default: try_all
 #------------------------- Configurações Avançadas------------------------------
 
 # PB_ são propriedades da porcentagem mostrada enquanto o PDF é gerado.
-# Os valores descrevem o comportamento da porcentagem simulada.  Você pode
-# configurar os valores, caso a porcetagem esteja passando de 100% durante
-# o processo.
+# Os valores descrevem o comportamento da porcentagem simulada.  Se a 
+# porcentagem chega em 99% antes do término da execução, pontos são impressos
+# até que o término ocorra.
+
 # Incremento do valor de porcentagem concluído.
+# Um valor muito alto, como 100, desabilita a impressão da porcentagem.
 PB_STEP=3
 # Intervalo entre cada incremento (segundos).
 PB_DELAY=0.08
+# Ao atingir o valor máximo da porcentagem (ou sem utilizar porcentagem), 
+# apenas pontos são impressos, com o intervalo de DOTS_DELAY
+DOTS_DELAY=0.5
 # Delay entre cada mensagem no modo debug.
 DEBUG_DELAY=0.3
 # Delay entre mostrar um erro e iniciar o modo debug.
@@ -131,13 +136,22 @@ ifeq ($(V),0)
 			 "arquivo TeX principal.";\
 		make clean;\
 		false;\
-	fi;
+	fi
 	@($(LATEX) $(MAIN) > /dev/null & latexpid=$$!; \
 		(while [ -d "/proc/$$latexpid" ] ; do \
-			echo -e "$$(($$(cat $(PROGRESS)) + $(PB_STEP)))" > $(PROGRESS); \
-			echo -en "\033[2K\r`cat $(PROGRESS)`%"; ex=$$?; \
-			sleep $(PB_DELAY); done &); \
-			wait $$latexpid; exit $$?) || (\
+			dots=0;\
+			pb=$$(($$(cat $(PROGRESS)) + $(PB_STEP)));\
+			if (( $$pb > 99 )); then dots=1; fi; \
+			if (( $$dots == 0 )); then \
+				echo -e "$$pb" > $(PROGRESS); \
+				echo -en "\033[2K\r`cat $(PROGRESS)`%"; ex=$$?; \
+				sleep $(PB_DELAY); \
+			else \
+				echo -n "."; \
+				sleep $(DOTS_DELAY); \
+			fi; \
+		done &); \
+		wait $$latexpid; exit $$?) || (\
 		echo -e "\n$(ERRO)  Erro ao gerar PDF";\
 		sleep $(ERROR_DELAY);\
 		echo -e "$(INFO) Entrando em modo debug";\
