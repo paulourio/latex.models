@@ -1,0 +1,24 @@
+
+Makefile
+========
+
+Adopted from SilentMakefile, diff:
+
+$ diff ../SilentMakefile/Makefile Makefile 
+31c31
+< PB_STEP=3
+---
+> PB_STEP=1
+33c33
+< PB_DELAY=0.08
+---
+> PB_DELAY=0.1
+200a201
+> tmpexts=*.out *.snm *.toc *.vrb *.err *.mpgs *.table *.aux *.bbl *.blg *.dat *.dvi *.gnuplot *.log *.nav
+202,203c203,204
+< 	@$(RM) *.aux *.bbl *.blg *.dat *.dvi *.gnuplot *.log *.nav
+< 	@$(RM) *.out *.snm *.toc *.vrb *.err *.mpgs *.table
+---
+> 	@$(RM) $(tmpexts)
+> 	@cd slides/ && $(RM) $(tmpexts)
+

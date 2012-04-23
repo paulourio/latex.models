@@ -1,0 +1,40 @@
+\documentclass[14pt,beamer]{beamer}
+\usepackage[brazilian]{babel}
+\usepackage[utf8]{inputenc} % Codificação UTF-8
+\usepackage[T2A,T1]{fontenc} % Pacote de hifenização
+\usepackage{graphicx} % Imagens
+
+\usepackage{listings} % Mostrar códigos com cores
+\usepackage{color}
+\usepackage{textcomp}
+
+\newcommand\cyrtext[1]{{\fontencoding{T2A}\selectfont #1}}
+
+\makeatletter
+
+\usepackage{tabularx,colortbl} % Cores nas tabelas
+
+\title{Meninas legais não comem queijo em jantares comemorativos}
+
+\author{Paulo Roberto Urio}
+\institute[UNICENTRO]{
+  Departamento de Ciência da Computação \\
+  Universidade Estadual do Centro-Oeste \\
+  Guarapuava, Brasil
+}
+\date{17 de Agosto de 2011}
+
+\include{configuracao} % Configuração dos slides
+
+\begin{document}
+	\begin{frame}
+		\titlepage
+	\end{frame}
+
+	\include{slides/introducao}
+
+    \include{slides/conclusao}
+
+    \include{slides/theend}
+
+\end{document}

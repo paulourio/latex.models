@@ -1,0 +1,50 @@
+\def\cret{\tikz{
+  \draw[->,rounded corners=2pt,thick,color=blue]
+       (1.25ex,.75em) -- (1.25ex,0pt) -- (0pt,0pt);}}
+
+
+\usetheme[secheader]{Madrid}
+\setbeamertemplate{navigation symbols}{}
+\defbeamertemplate*{footline}{infolines theme without institution}
+{
+  \leavevmode%
+  \hbox{%
+  \begin{beamercolorbox}[wd=.5\paperwidth,ht=2.25ex,dp=1ex,center]{title in head/foot}%
+    \usebeamerfont{title in head/foot}\insertshorttitle
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.5\paperwidth,ht=2.25ex,dp=1ex,right]{date in head/foot}%
+    \usebeamerfont{date in head/foot}\insertshortdate{}\hspace*{7em}
+    \insertframenumber{} / \inserttotalframenumber\hspace*{2ex}
+  \end{beamercolorbox}}%
+  \vskip0pt%
+}
+
+
+% Configurar a formatação para códigos na liguagem C
+\lstset{
+	language=C,
+	keywordstyle=\bfseries\ttfamily\color[rgb]{0,0,1},
+	identifierstyle=\ttfamily,
+	commentstyle=\color[rgb]{0.133,0.545,0.133},
+	stringstyle=\ttfamily\color[rgb]{0.627,0.126,0.941},
+	showstringspaces=false,
+	basicstyle=\small,
+	numberstyle=\footnotesize,
+	numbers=left,
+	stepnumber=1,
+	numbersep=10pt,
+	tabsize=2,
+	breaklines=true,
+	xleftmargin=15pt,
+	prebreak = \raisebox{0ex}[0ex][0ex]{\ensuremath{\hookleftarrow}},
+	breakatwhitespace=false,
+	aboveskip={1.5\baselineskip},
+	columns=flexible,
+	tabsize=3,
+  upquote=true,
+  extendedchars=true,
+% frame=single,
+% backgroundcolor=\color{lbcolor},
+}
+\lstset{language=C,basicstyle=\ttfamily}
+
