@@ -70,7 +70,7 @@ MAKEFLAGS += --no-print-directory
 
 try_all:
 	@if [ -z "$(BIB)" ]; then \
-		findbib=$$(find . -type f -iname "*.tex" | xargs grep -E '\\bibliography{(.*)}' | grep -o '{.*}' | sed 's/[{}]//g');\
+		findbib=$$(find . -type f -iname "*.tex" | xargs grep -E '^\s*\\bibliography{(.*)}' | grep -o '{.*}' | sed 's/[{}]//g');\
 		if [ -n "$$findbib" ]; then \
 			echo "Experimental: usando $$findbib.bib como bibliografia"; \
 			make BIB=$$findbib.bib; \
