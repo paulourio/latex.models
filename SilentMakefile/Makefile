@@ -54,7 +54,7 @@ PROGRESS=$(MAIN).mpgs
 # Arquivo temporário com os temos de execução
 TIMING_LOG=$(MAIN).timing.log
 # Execução do programa para contar o tempo de execução
-TIME=/usr/bin/time --format=%e -o $(TIMING_LOG) -a --quiet
+TIME=/usr/bin/time --format=%e -o $(TIMING_LOG) -a
 # Mensagens mostradas no terminal no formato "[tipo] mensagem"
 ERRO=\033[1m[\033[31;1mErro\033[0;1m]\033[0m
 FATAL=\033[1m[\033[31;1mErro Fatal\033[0;1m]\033[0m
